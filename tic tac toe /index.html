@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-setup {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e1e2e;
+        }
+
+        .game-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .current-player {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 30px auto;
+            max-width: 400px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 10px;
+            font-size: 3em;
+            font-weight: bold;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cell:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .cell:disabled {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #64ffda;
+        }
+
+        .cell.o {
+            color: #ff6b9d;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #1e1e2e;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(250, 112, 154, 0.4);
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            min-height: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .winning-cell {
+            background: rgba(100, 255, 218, 0.3) !important;
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Tic Tac Toe</h1>
+        
+        <div id="playerSetup" class="player-setup">
+            <div class="input-group">
+                <label for="player1">Player 1 Name (X):</label>
+                <input type="text" id="player1" placeholder="Enter Player 1 name" value="Player 1">
+            </div>
+            <div class="input-group">
+                <label for="player2">Player 2 Name (O):</label>
+                <input type="text" id="player2" placeholder="Enter Player 2 name" value="Player 2">
+            </div>
+            <button class="btn-start" onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="gameArea" class="hidden">
+            <div class="game-info">
+                <div class="current-player" id="currentPlayer"></div>
+                <div class="score-board">
+                    <div><span id="player1Name">Player 1</span>: <span id="player1Score">0</span></div>
+                    <div>Ties: <span id="tieScore">0</span></div>
+                    <div><span id="player2Name">Player 2</span>: <span id="player2Score">0</span></div>
+                </div>
+            </div>
+
+            <div class="board" id="board"></div>
+
+            <div class="message" id="message"></div>
+
+            <div class="controls">
+                <button class="btn-restart" onclick="restartGame()">New Round</button>
+                <button class="btn-reset" onclick="resetAll()">Reset Everything</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if localStorage is available
+        const storageAvailable = (() => {
+            try {
+                const test = '__storage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        })();
+
+        // Gameboard Module
+        const Gameboard = (() => {
+            let board = ['', '', '', '', '', '', '', '', ''];
+
+            const getBoard = () => board;
+            
+            const setCell = (index, mark) => {
+                if (board[index] === '') {
+                    board[index] = mark;
+                    return true;
+                }
+                return false;
+            };
+            
+            const reset = () => {
+                board = ['', '', '', '', '', '', '', '', ''];
+            };
+
+            return { getBoard, setCell, reset };
+        })();
+
+        // Player Factory
+        const Player = (name, mark) => {
+            return { name, mark };
+        };
+
+        // Game Controller Module
+        const GameController = (() => {
+            let players = [];
+            let currentPlayerIndex = 0;
+            let gameActive = false;
+            let scores = { player1: 0, player2: 0, ties: 0 };
+
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            const init = (p1Name, p2Name) => {
+                players = [Player(p1Name, 'X'), Player(p2Name, 'O')];
+                currentPlayerIndex = 0;
+                gameActive = true;
+                loadScores();
+            };
+
+            const getCurrentPlayer = () => players[currentPlayerIndex];
+
+            const switchPlayer = () => {
+                currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+            };
+
+            const checkWin = () => {
+                const board = Gameboard.getBoard();
+                for (let pattern of winPatterns) {
+                    const [a, b, c] = pattern;
+                    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                        return { winner: true, pattern };
+                    }
+                }
+                return { winner: false, pattern: null };
+            };
+
+            const checkTie = () => {
+                return Gameboard.getBoard().every(cell => cell !== '');
+            };
+
+            const playTurn = (index) => {
+                if (!gameActive) return false;
+                
+                const currentPlayer = getCurrentPlayer();
+                if (Gameboard.setCell(index, currentPlayer.mark)) {
+                    const winResult = checkWin();
+                    if (winResult.winner) {
+                        gameActive = false;
+                        if (currentPlayerIndex === 0) {
+                            scores.player1++;
+                        } else {
+                            scores.player2++;
+                        }
+                        saveScores();
+                        return { status: 'win', player: currentPlayer, pattern: winResult.pattern };
+                    } else if (checkTie()) {
+                        gameActive = false;
+                        scores.ties++;
+                        saveScores();
+                        return { status: 'tie' };
+                    }
+                    switchPlayer();
+                    return { status: 'continue' };
+                }
+                return false;
+            };
+
+            const resetGame = () => {
+                Gameboard.reset();
+                currentPlayerIndex = 0;
+                gameActive = true;
+            };
+
+            const saveScores = () => {
+                if (!storageAvailable) return;
+                
+                const data = {
+                    scores,
+                    player1Name: players[0].name,
+                    player2Name: players[1].name
+                };
+                try {
+                    localStorage.setItem('ticTacToeData', JSON.stringify(data));
+                } catch (e) {
+                    console.warn('Could not save to localStorage:', e);
+                }
+            };
+
+            const loadScores = () => {
+                if (!storageAvailable) return;
+                
+                try {
+                    const data = localStorage.getItem('ticTacToeData');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        scores = parsed.scores || { player1: 0, player2: 0, ties: 0 };
+                    }
+                } catch (e) {
+                    console.warn('Could not load from localStorage:', e);
+                    scores = { player1: 0, player2: 0, ties: 0 };
+                }
+            };
+
+            const resetScores = () => {
+                scores = { player1: 0, player2: 0, ties: 0 };
+                if (storageAvailable) {
+                    try {
+                        localStorage.removeItem('ticTacToeData');
+                    } catch (e) {
+                        console.warn('Could not clear localStorage:', e);
+                    }
+                }
+            };
+
+            const getScores = () => scores;
+            const isActive = () => gameActive;
+
+            return { 
+                init, 
+                getCurrentPlayer, 
+                playTurn, 
+                resetGame, 
+                resetScores, 
+                getScores, 
+                isActive 
+            };
+        })();
+
+        // Display Controller Module
+        const DisplayController = (() => {
+            const boardElement = document.getElementById('board');
+            const messageElement = document.getElementById('message');
+            const currentPlayerElement = document.getElementById('currentPlayer');
+            const player1ScoreElement = document.getElementById('player1Score');
+            const player2ScoreElement = document.getElementById('player2Score');
+            const tieScoreElement = document.getElementById('tieScore');
+            const player1NameElement = document.getElementById('player1Name');
+            const player2NameElement = document.getElementById('player2Name');
+
+            const renderBoard = () => {
+                boardElement.innerHTML = '';
+                const board = Gameboard.getBoard();
+                board.forEach((cell, index) => {
+                    const cellButton = document.createElement('button');
+                    cellButton.classList.add('cell');
+                    cellButton.textContent = cell;
+                    if (cell === 'X') cellButton.classList.add('x');
+                    if (cell === 'O') cellButton.classList.add('o');
+                    if (cell !== '' || !GameController.isActive()) {
+                        cellButton.disabled = true;
+                    }
+                    cellButton.addEventListener('click', () => handleCellClick(index));
+                    boardElement.appendChild(cellButton);
+                });
+            };
+
+            const handleCellClick = (index) => {
+                const result = GameController.playTurn(index);
+                if (result) {
+                    renderBoard();
+                    if (result.status === 'win') {
+                        highlightWinningCells(result.pattern);
+                        showMessage(`🎉 ${result.player.name} wins!`);
+                        updateScores();
+                    } else if (result.status === 'tie') {
+                        showMessage("It's a tie! 🤝");
+                        updateScores();
+                    } else {
+                        updateCurrentPlayer();
+                    }
+                }
+            };
+
+            const highlightWinningCells = (pattern) => {
+                const cells = boardElement.querySelectorAll('.cell');
+                pattern.forEach(index => {
+                    cells[index].classList.add('winning-cell');
+                });
+            };
+
+            const showMessage = (msg) => {
+                messageElement.textContent = msg;
+            };
+
+            const updateCurrentPlayer = () => {
+                const player = GameController.getCurrentPlayer();
+                currentPlayerElement.textContent = `Current Turn: ${player.name} (${player.mark})`;
+                messageElement.textContent = '';
+            };
+
+            const updateScores = () => {
+                const scores = GameController.getScores();
+                player1ScoreElement.textContent = scores.player1;
+                player2ScoreElement.textContent = scores.player2;
+                tieScoreElement.textContent = scores.ties;
+            };
+
+            const updatePlayerNames = (p1, p2) => {
+                player1NameElement.textContent = p1;
+                player2NameElement.textContent = p2;
+            };
+
+            return { 
+                renderBoard, 
+                updateCurrentPlayer, 
+                updateScores, 
+                updatePlayerNames, 
+                showMessage 
+            };
+        })();
+
+        // Global functions
+        function startGame() {
+            const player1Input = document.getElementById('player1').value.trim() || 'Player 1';
+            const player2Input = document.getElementById('player2').value.trim() || 'Player 2';
+
+            GameController.init(player1Input, player2Input);
+            DisplayController.updatePlayerNames(player1Input, player2Input);
+            DisplayController.updateScores();
+            
+            document.getElementById('playerSetup').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            
+            DisplayController.renderBoard();
+            DisplayController.updateCurrentPlayer();
+        }
+
+        function restartGame() {
+            GameController.resetGame();
+            DisplayController.renderBoard();
+            DisplayController.updateCurrentPlayer();
+        }
+
+        function resetAll() {
+            if (confirm('This will reset all scores and player names. Continue?')) {
+                GameController.resetScores();
+                document.getElementById('playerSetup').classList.remove('hidden');
+                document.getElementById('gameArea').classList.add('hidden');
+                document.getElementById('player1').value = 'Player 1';
+                document.getElementById('player2').value = 'Player 2';
+            }
+        }
+
+        // Show warning if localStorage is not available
+        if (!storageAvailable) {
+            console.warn('localStorage is not available. Scores will not persist.');
+        }
+    </script>
+</body>
+</html>
